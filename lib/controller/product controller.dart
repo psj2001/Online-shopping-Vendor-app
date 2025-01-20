@@ -10,7 +10,7 @@ import 'package:online_shopping_vendor_app/service/Manage%20http%20response.dart
 import '../utils/global variable.dart';
 
 class ProductController {
-  void uploadPrProduct({
+  Future<void> uploadPrProduct({
   required BuildContext context,
   required String productName,
   required int productPrice,

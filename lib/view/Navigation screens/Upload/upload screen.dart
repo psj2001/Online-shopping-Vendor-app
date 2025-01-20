@@ -29,6 +29,8 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   late int quantity;
   late String description;
 
+  bool isLoading = false;
+
   late Future<List<Category>> futureCategories;
   Future<List<SubcategoryModel>>? futuresubcategories;
   Category? selectedCategory;
@@ -86,7 +88,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 200,
+                width: 200, 
                 child: FutureBuilder<List<Category>>(
                   future: futureCategories,
                   builder: (context, snapshot) {
@@ -121,9 +123,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   },
                 ),
               ),
-
+          
               //////////////////////////////////////////////////////////////////////////////////////////
-
+          
               SizedBox(
                 width: 200,
                 child: FutureBuilder<List<SubcategoryModel>>(
@@ -157,7 +159,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   },
                 ),
               ),
-
+          
               SizedBox(
                 width: 200,
                 child: TextFormField(
@@ -184,7 +186,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               SizedBox(
                 width: 200,
                 child: TextFormField(
-                  keyboardType: TextInputType.phone,
+                  keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Enter Product Quantity";
@@ -212,7 +214,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               SizedBox(
                 width: 200,
                 child: TextFormField(
-                  keyboardType: TextInputType.phone,
+                  keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Enter Product Price";
@@ -234,7 +236,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   ),
                 ),
               ),
-
+          
               SizedBox(
                 height: 10,
               ),
@@ -291,31 +293,45 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   },
                 ),
               ),
-
+          
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: InkWell(
                   onTap: () async {
                     final vendorId = ref.read(vendorProvider)!.id;
                     print("vendor id: $globalVendorId");
+          
                     if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        isLoading = true;
+                      });
                       if (selectedCategory != null &&
                           selectedSubCategory != null) {
                         final fullName = ref.read(vendorProvider)!.fullName;
                         final vendorId = ref.read(vendorProvider)!.id;
-
-                        _productController.uploadPrProduct(
-                          context: context,
-                          productName: productName,
-                          productPrice: productPrice,
-                          quantity: quantity,
-                          description: description,
-                          category: selectedCategory!.name,
-                          vendorId: '$globalVendorId',//"678622ec494371c7ae050acc"
-                          fullName: fullName,
-                          subCategory: selectedSubCategory!.subCategoryName,
-                          PickedImages: images,
-                        );
+          
+                        await _productController
+                            .uploadPrProduct(
+                              context: context,
+                              productName: productName,
+                              productPrice: productPrice,
+                              quantity: quantity,
+                              description: description,
+                              category: selectedCategory!.name,
+                              vendorId:
+                                  '$globalVendorId', //"678622ec494371c7ae050acc"
+                              fullName: fullName,
+                              subCategory:
+                                  selectedSubCategory!.subCategoryName,
+                              PickedImages: images,
+                            )
+                            .whenComplete(() {});
+                        setState(() {
+                          isLoading = false;
+                          selectedCategory = null;
+                          selectedSubCategory = null;
+                          images.clear();
+                        });
                       } else {
                         showSnackbar(context,
                             'Please select both category and subcategory');
@@ -333,7 +349,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Center(
-                      child: Text(
+                      child:isLoading?CircularProgressIndicator(
+                        color: Colors.white,
+                      ): Text(
                         "Upload",
                         style: TextStyle(
                             color: Colors.white,
