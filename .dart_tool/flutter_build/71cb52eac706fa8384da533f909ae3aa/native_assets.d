@@ -1,0 +1,1 @@
+ /Users/pranavps/Documents/Online-shopping-Vendor-app/.dart_tool/flutter_build/71cb52eac706fa8384da533f909ae3aa/native_assets.yaml: 
